@@ -1,0 +1,19 @@
+services:
+  pumpfun-bot:
+    image: pumpfun-bot:latest
+    build: .
+    container_name: pumpfun-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      BOT_CONFIG: ${BOT_CONFIG:-bots/example.yaml}
+    volumes:
+      - ./bots:/app/bots:ro      # 策略参数
+      - ./trades:/app/trades     # 成交记录
+      - ./logs:/app/logs         # 日志
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

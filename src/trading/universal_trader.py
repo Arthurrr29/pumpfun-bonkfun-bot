@@ -9,7 +9,20 @@ from datetime import datetime
 from pathlib import Path
 from time import monotonic
 
-import uvloop
+# --- uvloop: optional, use if available; fallback to default asyncio
+try:
+    import uvloop  # type: ignore
+except Exception:
+    uvloop = None
+
+if uvloop is not None and hasattr(uvloop, "EventLoopPolicy"):
+    try:
+        asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
+    except Exception:
+        # If setting policy fails, silently fall back to default asyncio loop
+        pass
+# --- end uvloop
+
 from solders.pubkey import Pubkey
 
 from cleanup.modes import (
@@ -28,9 +41,8 @@ from trading.platform_aware import PlatformAwareBuyer, PlatformAwareSeller
 from trading.position import Position
 from utils.logger import get_logger
 
-asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-
 logger = get_logger(__name__)
+
 
 
 class UniversalTrader:
